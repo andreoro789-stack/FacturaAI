@@ -12,6 +12,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
+    <!-- SweetAlert2 para modales y alertas estilizadas -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
         :root {
             --bg-canvas: #f8fafc;
@@ -79,6 +82,34 @@
             font-weight: 600;
             font-size: 0.85rem;
             padding: 7px 14px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-brand-outline:hover {
+            background: #f8fafc;
+            border-color: var(--border-active);
+        }
+
+        .btn-delete-row {
+            background-color: #fee2e2;
+            color: #ef4444;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-delete-row:hover {
+            background-color: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
         }
 
         .input-enterprise {
@@ -322,7 +353,9 @@
         <div class="card-enterprise p-4 mt-4">
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
                 <h6 class="fw-bold text-dark mb-0">Historial de Facturas Aprobadas</h6>
-                <button type="button" id="btnLimpiarBD" class="btn btn-brand-outline text-danger">Vaciar Historial</button>
+                <button type="button" id="btnLimpiarBD" class="btn btn-brand-outline text-danger d-flex align-items-center gap-1">
+                    <i class="bi bi-trash3"></i> Vaciar Historial
+                </button>
             </div>
 
             <div class="table-responsive rounded border">
@@ -643,8 +676,9 @@
                             <td><span class="badge bg-success-subtle text-success border border-success-subtle font-mono">${item.total}</span></td>
                             <td class="text-secondary small" style="max-width: 300px;">${item.resumen}</td>
                             <td class="text-end">
-                                <button onclick="eliminarFactura(${item.id})" class="btn btn-sm btn-link text-danger p-0">
-                                    <i class="bi bi-trash fs-6"></i>
+                                <button onclick="eliminarFactura(${item.id})" class="btn-delete-row" title="Eliminar comprobante">
+                                    <i class="bi bi-trash3-fill"></i>
+                                    <span>Eliminar</span>
                                 </button>
                             </td>
                         </tr>
@@ -656,20 +690,81 @@
         }
 
         async function eliminarFactura(id) {
-            if (!confirm(`¿Eliminar la factura #${id}?`)) return;
-            try {
-                const res = await fetch(`/api/factura/${id}`, { method: 'DELETE' });
-                if (res.ok) cargarHistorial();
-                else alert('Error al eliminar');
-            } catch (err) {
-                alert('Error al eliminar: ' + err);
-            }
+            Swal.fire({
+                title: '¿Eliminar factura?',
+                text: `La factura #${id} será removida permanentemente del historial.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="bi bi-trash3-fill me-1"></i> Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                customClass: {
+                    popup: 'rounded-4 shadow-lg border'
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const res = await fetch(`/api/factura/${id}`, { method: 'DELETE' });
+                        if (res.ok) {
+                            Swal.fire({
+                                title: '¡Eliminada!',
+                                text: `La factura #${id} se ha borrado correctamente.`,
+                                icon: 'success',
+                                timer: 1400,
+                                showConfirmButton: false,
+                                customClass: {
+                                    popup: 'rounded-4'
+                                }
+                            });
+                            cargarHistorial();
+                        } else {
+                            Swal.fire('Error', 'No se pudo eliminar el registro en la base de datos.', 'error');
+                        }
+                    } catch (err) {
+                        Swal.fire('Error', 'Error de red al intentar eliminar: ' + err, 'error');
+                    }
+                }
+            });
         }
 
         document.getElementById('btnLimpiarBD').addEventListener('click', async () => {
-            if (!confirm('¿Vaciar todas las facturas?')) return;
-            await fetch('/api/limpiar-historial', { method: 'POST' });
-            cargarHistorial();
+            Swal.fire({
+                title: '¿Vaciar todo el historial?',
+                text: 'Se eliminarán de forma irreversible todas las facturas y comprobantes auditados.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="bi bi-trash3-fill me-1"></i> Sí, vaciar todo',
+                cancelButtonText: 'Cancelar',
+                customClass: {
+                    popup: 'rounded-4 shadow-lg border'
+                }
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const res = await fetch('/api/limpiar-historial', { method: 'POST' });
+                        if (res.ok) {
+                            Swal.fire({
+                                title: 'Historial limpio',
+                                text: 'Se han eliminado todos los registros almacenados.',
+                                icon: 'success',
+                                timer: 1500,
+                                showConfirmButton: false,
+                                customClass: {
+                                    popup: 'rounded-4'
+                                }
+                            });
+                            cargarHistorial();
+                        } else {
+                            Swal.fire('Error', 'No se pudo vaciar la base de datos.', 'error');
+                        }
+                    } catch (err) {
+                        Swal.fire('Error', 'Error de red: ' + err, 'error');
+                    }
+                }
+            });
         });
 
         cargarHistorial();
