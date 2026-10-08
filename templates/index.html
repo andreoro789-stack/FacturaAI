@@ -1,1 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FacturaAI • Portal de Análisis y Gestión Contable</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        :root {
+            --bg-canvas: #f8fafc;
+            --surface-card: #ffffff;
+            --border-subtle: #e2e8f0;
+            --border-active: #cbd5e1;
+            --text-heading: #0f172a;
+            --text-body: #334155;
+            --text-muted: #64748b;
+            --brand-primary: #4f46e5;
+            --brand-primary-hover: #4338ca;
+            --brand-accent: #0284c7;
+            --radius-card: 16px;
+            --radius-inner: 10px;
+        }
 
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-body);
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+        }
+
+        .card-enterprise {
+            background: var(--surface-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-card);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+            transition: all 0.25s ease;
+        }
+
+        .dropzone-enterprise {
+            border: 2px dashed #cbd5e1;
+            background: #fafafa;
+            border-radius: var(--radius-inner);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .dropzone-enterprise:hover, .dropzone-enterprise.dragover {
+            border-color: var(--brand-primary);
+            background: #f5f3ff;
+        }
+
+        .btn-brand-primary {
+            background: linear-gradient(135deg, var(--brand-primary) 0%, #3b82f6 100%);
+            color: #ffffff;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--radius-inner);
+            padding: 12px 24px;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        }
+
+        .btn-brand-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--brand-primary-hover) 0%, #2563eb 100%);
+            color: #ffffff;
+        }
+
+        .btn-brand-outline {
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-body);
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 7px 14px;
+        }
+
+        .input-enterprise {
+            background-color: #f8fafc !important;
+            border: 1px solid var(--border-subtle) !important;
+            color: var(--text-heading) !important;
+            border-radius: 8px;
+            font-size: 0.92rem;
+            padding: 9px 13px;
+        }
+
+        .field-caption {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        .table-enterprise {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table-enterprise thead th {
+            background: #f8fafc;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .table-enterprise tbody td {
+            padding: 14px 18px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.88rem;
+        }
+
+        .nav-pills .nav-link {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-radius: 8px;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: var(--brand-primary);
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="py-4">
+    <div class="container-xl">
+
+        <!-- Encabezado -->
+        <header class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom">
+            <div class="d-flex align-items-center">
+                <div class="p-3 rounded-3 me-3 text-white shadow-sm" style="background: linear-gradient(135deg, #4f46e5, #0284c7);">
+                    <i class="bi bi-receipt-cutoff fs-3"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="fw-bold mb-0 text-dark">FacturaAI</h4>
+                        <span class="badge rounded-pill bg-light text-primary border">Versión 2.5</span>
+                    </div>
+                    <p class="text-muted small mb-0 mt-1">Carga desde PC, enlace directo o captura móvil en vivo</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="row g-4">
+            
+            <!-- Panel Izquierdo: Carga y Procesamiento -->
+            <div class="col-lg-5">
+                <div class="card-enterprise p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                                <i class="bi bi-cloud-arrow-up text-primary"></i> Origen del Documento
+                            </h6>
+                            <button type="button" id="btnLimpiarCarga" class="btn btn-sm btn-outline-danger d-none">
+                                <i class="bi bi-x-circle me-1"></i> Descartar
+                            </button>
+                        </div>
+
+                        <!-- Selector de Modos -->
+                        <ul class="nav nav-pills nav-fill mb-3" id="tabModo">
+                            <li class="nav-item">
+                                <button class="nav-link active" id="tabArchivo" type="button"><i class="bi bi-upload me-1"></i> Archivo</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="tabLink" type="button"><i class="bi bi-link-45deg me-1"></i> Enlace</button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="tabMovil" type="button"><i class="bi bi-phone me-1"></i> Celular</button>
+                            </li>
+                        </ul>
+
+                        <form id="uploadForm">
+                            <!-- Modo 1: Archivo local -->
+                            <div id="seccionArchivo">
+                                <input type="file" id="facturaInput" accept="image/*" class="d-none">
+                                <div id="dropzone" class="dropzone-enterprise p-4 text-center mb-3" style="min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <div id="dropzoneContent">
+                                        <i class="bi bi-file-earmark-image fs-1 text-primary opacity-75 mb-2"></i>
+                                        <p class="fw-bold text-dark mb-1">Arrastra tu factura aquí o haz clic</p>
+                                        <span class="text-muted small">JPG, PNG o WEBP</span>
+                                    </div>
+                                    <img id="previewImg" src="#" alt="Factura" class="img-fluid rounded border d-none shadow-sm" style="max-height: 220px; object-fit: contain;">
+                                </div>
+                            </div>
+
+                            <!-- Modo 2: Enlace directo -->
+                            <div id="seccionLink" class="d-none mb-3">
+                                <label class="field-caption">URL Directa de la Imagen</label>
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text bg-white"><i class="bi bi-globe"></i></span>
+                                    <input type="url" id="linkInput" class="form-control input-enterprise" placeholder="https://ejemplo.com/factura.jpg">
+                                </div>
+                                <div class="text-center p-2 border rounded bg-light" id="previewLinkContainer" style="min-height: 180px; display: flex; align-items: center; justify-content: center;">
+                                    <span class="text-muted small" id="previewLinkText">Pega un enlace directo para previsualizar</span>
+                                    <img id="previewLinkImg" src="#" alt="Preview URL" class="img-fluid rounded border d-none shadow-sm" style="max-height: 180px; object-fit: contain;">
+                                </div>
+                            </div>
+
+                            <!-- Modo 3: Celular con Código QR -->
+                            <div id="seccionMovil" class="d-none mb-3 text-center">
+                                <div class="p-3 border rounded bg-light">
+                                    <h6 class="fw-bold text-dark mb-1">Escanea con la cámara de tu celular</h6>
+                                    <p class="text-muted small mb-2">Conéctate al mismo Wi-Fi que esta computadora</p>
+                                    <img id="qrImg" src="#" alt="QR" class="img-fluid rounded border p-2 bg-white shadow-sm mb-2" style="max-width: 170px;">
+                                    <div class="font-mono small text-muted" id="qrUrlText">Cargando dirección...</div>
+                                    <div class="mt-2 text-primary small d-flex align-items-center justify-content-center gap-2">
+                                        <div class="spinner-grow spinner-grow-sm text-primary" role="status"></div>
+                                        <span>Esperando captura desde el teléfono...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="btnAnalizar" class="btn btn-brand-primary w-100 py-3 d-flex align-items-center justify-content-center gap-2" disabled>
+                                <i class="bi bi-stars"></i> Evaluar y Auditar Documento
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top text-muted small d-flex justify-content-between">
+                        <span><i class="bi bi-shield-check text-success me-1"></i> Filtro de comprobante comercial</span>
+                        <span>Motor: Gemini AI</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Derecho: Datos Extraídos -->
+            <div class="col-lg-7">
+                <div class="card-enterprise p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                            <i class="bi bi-receipt text-primary"></i> Resultado de la Auditoría
+                        </h6>
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="badgeTotal" class="badge bg-success-subtle text-success border border-success-subtle font-mono fs-6 px-3 py-2 rounded-pill d-none">
+                                Total: Q0.00
+                            </span>
+                            <button type="button" id="btnLimpiarResultados" class="btn btn-brand-outline d-none">
+                                <i class="bi bi-eraser me-1"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Loader -->
+                    <div id="loader" class="text-center py-5 d-none">
+                        <div class="spinner-border text-primary mb-3" role="status" style="width: 2.8rem; height: 2.8rem;"></div>
+                        <h6 class="fw-bold text-dark">Auditando y validando contenido...</h6>
+                        <p class="text-muted small">Verificando autenticidad contable y desgloses de impuestos con Gemini.</p>
+                    </div>
+
+                    <!-- Mensaje de Rechazo / Error -->
+                    <div id="errorAlert" class="alert alert-danger d-none my-3" role="alert">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="bi bi-exclamation-octagon-fill fs-5"></i>
+                            <h6 class="alert-heading fw-bold mb-0">Comprobante Rechazado</h6>
+                        </div>
+                        <p id="errorMsg" class="mb-0 small"></p>
+                    </div>
+
+                    <!-- Estado Vacío -->
+                    <div id="emptyState" class="text-center py-5 text-muted">
+                        <div class="p-3 bg-light rounded-circle d-inline-block mb-3">
+                            <i class="bi bi-inbox fs-2 opacity-50"></i>
+                        </div>
+                        <p class="fw-bold text-dark mb-1">Sin factura analizada</p>
+                        <p class="small text-muted mx-auto" style="max-width: 320px;">Sube una imagen, pega una URL o escanea con tu teléfono para comenzar.</p>
+                    </div>
+
+                    <!-- Contenedor de Datos -->
+                    <div id="resultContent" class="d-none">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-7">
+                                <div class="field-caption">Establecimiento</div>
+                                <input type="text" id="resEstablecimiento" class="form-control input-enterprise fw-bold" readonly>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="field-caption">NIT / Identificación</div>
+                                <input type="text" id="resNit" class="form-control input-enterprise font-mono" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="field-caption">Fecha de Compra</div>
+                                <input type="text" id="resFecha" class="form-control input-enterprise" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="field-caption">Subtotal</div>
+                                <input type="text" id="resSubtotal" class="form-control input-enterprise font-mono" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="field-caption">Impuestos (IVA)</div>
+                                <input type="text" id="resImpuestos" class="form-control input-enterprise font-mono" readonly>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="field-caption">Productos Detectados</div>
+                            <textarea id="resProductos" class="form-control input-enterprise font-mono small" rows="2" readonly></textarea>
+                        </div>
+
+                        <div>
+                            <div class="field-caption">Resumen Ejecutivo</div>
+                            <div id="resResumen" class="p-3 rounded border bg-light text-dark small"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial -->
+        <div class="card-enterprise p-4 mt-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                <h6 class="fw-bold text-dark mb-0">Historial de Facturas Aprobadas</h6>
+                <button type="button" id="btnLimpiarBD" class="btn btn-brand-outline text-danger">Vaciar Historial</button>
+            </div>
+
+            <div class="table-responsive rounded border">
+                <table class="table-enterprise">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Establecimiento</th>
+                            <th>NIT</th>
+                            <th>Fecha</th>
+                            <th>Total Pagado</th>
+                            <th>Resumen</th>
+                            <th class="text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaHistorial">
+                        <tr><td colspan="7" class="text-center text-muted py-4">Cargando registros...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let modoActual = 'archivo'; // 'archivo' | 'link' | 'movil'
+        let intervaloPollingMovil = null;
+
+        const tabArchivo = document.getElementById('tabArchivo');
+        const tabLink = document.getElementById('tabLink');
+        const tabMovil = document.getElementById('tabMovil');
+        const seccionArchivo = document.getElementById('seccionArchivo');
+        const seccionLink = document.getElementById('seccionLink');
+        const seccionMovil = document.getElementById('seccionMovil');
+
+        const input = document.getElementById('facturaInput');
+        const dropzone = document.getElementById('dropzone');
+        const dropzoneContent = document.getElementById('dropzoneContent');
+        const previewImg = document.getElementById('previewImg');
+        const linkInput = document.getElementById('linkInput');
+        const previewLinkImg = document.getElementById('previewLinkImg');
+        const previewLinkText = document.getElementById('previewLinkText');
+        const qrImg = document.getElementById('qrImg');
+        const qrUrlText = document.getElementById('qrUrlText');
+
+        const btnAnalizar = document.getElementById('btnAnalizar');
+        const btnLimpiarCarga = document.getElementById('btnLimpiarCarga');
+        const btnLimpiarResultados = document.getElementById('btnLimpiarResultados');
+        const uploadForm = document.getElementById('uploadForm');
+        const errorAlert = document.getElementById('errorAlert');
+        const errorMsg = document.getElementById('errorMsg');
+
+        function mostrarError(mensaje) {
+            errorMsg.innerText = mensaje;
+            errorAlert.classList.remove('d-none');
+        }
+
+        function ocultarError() {
+            errorAlert.classList.add('d-none');
+        }
+
+        // Alternar pestañas
+        tabArchivo.addEventListener('click', () => {
+            modoActual = 'archivo';
+            detenerPollingMovil();
+            tabArchivo.classList.add('active');
+            tabLink.classList.remove('active');
+            tabMovil.classList.remove('active');
+            seccionArchivo.classList.remove('d-none');
+            seccionLink.classList.add('d-none');
+            seccionMovil.classList.add('d-none');
+            evaluarEstadoBoton();
+        });
+
+        tabLink.addEventListener('click', () => {
+            modoActual = 'link';
+            detenerPollingMovil();
+            tabLink.classList.add('active');
+            tabArchivo.classList.remove('active');
+            tabMovil.classList.remove('active');
+            seccionLink.classList.remove('d-none');
+            seccionArchivo.classList.add('d-none');
+            seccionMovil.classList.add('d-none');
+            evaluarEstadoBoton();
+        });
+
+        tabMovil.addEventListener('click', async () => {
+            modoActual = 'movil';
+            tabMovil.classList.add('active');
+            tabArchivo.classList.remove('active');
+            tabLink.classList.remove('active');
+            seccionMovil.classList.remove('d-none');
+            seccionArchivo.classList.add('d-none');
+            seccionLink.classList.add('d-none');
+            btnAnalizar.disabled = true;
+
+            // Obtener enlace y código QR
+            try {
+                const res = await fetch('/api/info-red');
+                const info = await res.json();
+                qrUrlText.innerText = info.url_movil;
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(info.url_movil)}`;
+                iniciarPollingMovil();
+            } catch (e) {
+                qrUrlText.innerText = "Error obteniendo dirección IP local";
+            }
+        });
+
+        function iniciarPollingMovil() {
+            detenerPollingMovil();
+            intervaloPollingMovil = setInterval(async () => {
+                try {
+                    const res = await fetch('/api/comprobar-movil');
+                    const json = await res.json();
+                    if (json.recibido) {
+                        detenerPollingMovil();
+                        // 1. Mostrar de inmediato la imagen recibida en la vista previa izquierda
+                        activarPreviaMovil(json.url_preview);
+                        // 2. Procesar con Gemini mostrando el loader al mismo tiempo
+                        procesarCapturaMovil(json.ruta);
+                    }
+                } catch (e) {}
+            }, 2000);
+        }
+
+        function detenerPollingMovil() {
+            if (intervaloPollingMovil) {
+                clearInterval(intervaloPollingMovil);
+                intervaloPollingMovil = null;
+            }
+        }
+
+        function activarPreviaMovil(urlPreview) {
+            // Cambiar a la pestaña de vista previa visual
+            seccionMovil.classList.add('d-none');
+            seccionArchivo.classList.remove('d-none');
+            tabMovil.classList.remove('active');
+            tabArchivo.classList.add('active');
+            modoActual = 'movil';
+
+            previewImg.src = urlPreview;
+            previewImg.classList.remove('d-none');
+            dropzoneContent.classList.add('d-none');
+            btnLimpiarCarga.classList.remove('d-none');
+        }
+
+        async function procesarCapturaMovil(ruta) {
+            const formData = new FormData();
+            formData.append('tipo', 'movil');
+            formData.append('ruta_local', ruta);
+            ejecutarEnvio(formData);
+        }
+
+        linkInput.addEventListener('input', () => {
+            const url = linkInput.value.trim();
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+                previewLinkImg.src = url;
+                previewLinkImg.classList.remove('d-none');
+                previewLinkText.classList.add('d-none');
+                btnAnalizar.disabled = false;
+                btnLimpiarCarga.classList.remove('d-none');
+            } else {
+                previewLinkImg.classList.add('d-none');
+                previewLinkText.classList.remove('d-none');
+                btnAnalizar.disabled = true;
+            }
+        });
+
+        previewLinkImg.addEventListener('error', () => {
+            previewLinkImg.classList.add('d-none');
+            previewLinkText.innerText = "No se pudo cargar la imagen previa del enlace.";
+            previewLinkText.classList.remove('d-none');
+        });
+
+        function evaluarEstadoBoton() {
+            if (modoActual === 'archivo') {
+                btnAnalizar.disabled = !input.files.length;
+            } else if (modoActual === 'link') {
+                btnAnalizar.disabled = !linkInput.value.trim();
+            }
+        }
+
+        dropzone.addEventListener('click', () => input.click());
+        ['dragenter', 'dragover'].forEach(name => {
+            dropzone.addEventListener(name, (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+        });
+        ['dragleave', 'drop'].forEach(name => {
+            dropzone.addEventListener(name, (e) => { e.preventDefault(); dropzone.classList.remove('dragover'); });
+        });
+        dropzone.addEventListener('drop', (e) => {
+            if (e.dataTransfer.files.length) {
+                input.files = e.dataTransfer.files;
+                cargarArchivo(input.files[0]);
+            }
+        });
+        input.addEventListener('change', (e) => {
+            if (e.target.files.length) cargarArchivo(e.target.files[0]);
+        });
+
+        function cargarArchivo(file) {
+            previewImg.src = URL.createObjectURL(file);
+            previewImg.classList.remove('d-none');
+            dropzoneContent.classList.add('d-none');
+            btnAnalizar.disabled = false;
+            btnLimpiarCarga.classList.remove('d-none');
+            ocultarError();
+        }
+
+        btnLimpiarCarga.addEventListener('click', () => {
+            input.value = '';
+            linkInput.value = '';
+            previewImg.src = '#';
+            previewImg.classList.add('d-none');
+            previewLinkImg.src = '#';
+            previewLinkImg.classList.add('d-none');
+            dropzoneContent.classList.remove('d-none');
+            previewLinkText.classList.remove('d-none');
+            previewLinkText.innerText = "Pega un enlace directo para previsualizar";
+            btnAnalizar.disabled = true;
+            btnLimpiarCarga.classList.add('d-none');
+            ocultarError();
+        });
+
+        btnLimpiarResultados.addEventListener('click', () => {
+            document.getElementById('resultContent').classList.add('d-none');
+            document.getElementById('badgeTotal').classList.add('d-none');
+            btnLimpiarResultados.classList.add('d-none');
+            document.getElementById('emptyState').classList.remove('d-none');
+            ocultarError();
+        });
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('tipo', modoActual);
+
+            if (modoActual === 'archivo') {
+                if (!input.files || input.files.length === 0) {
+                    mostrarError("Debes seleccionar una imagen primero.");
+                    return;
+                }
+                formData.append('factura', input.files[0]);
+            } else {
+                const url = linkInput.value.trim();
+                if (!url) {
+                    mostrarError("Debes pegar una URL de imagen válida.");
+                    return;
+                }
+                formData.append('url_imagen', url);
+            }
+
+            ejecutarEnvio(formData);
+        });
+
+        async function ejecutarEnvio(formData) {
+            document.getElementById('loader').classList.remove('d-none');
+            document.getElementById('emptyState').classList.add('d-none');
+            document.getElementById('resultContent').classList.add('d-none');
+            document.getElementById('badgeTotal').classList.add('d-none');
+            btnLimpiarResultados.classList.add('d-none');
+            btnAnalizar.disabled = true;
+            ocultarError();
+
+            try {
+                const res = await fetch('/api/analizar', { method: 'POST', body: formData });
+                const json = await res.json();
+
+                document.getElementById('loader').classList.add('d-none');
+                btnAnalizar.disabled = false;
+
+                if (res.ok && json.status === 'success') {
+                    const d = json.data;
+                    document.getElementById('resEstablecimiento').value = d.establecimiento || 'N/A';
+                    document.getElementById('resNit').value = d.nit || 'N/A';
+                    document.getElementById('resFecha').value = d.fecha || 'N/A';
+                    document.getElementById('resSubtotal').value = d.subtotal || 'N/A';
+                    document.getElementById('resImpuestos').value = d.impuestos || 'N/A';
+                    document.getElementById('resProductos').value = d.productos || 'N/A';
+                    document.getElementById('resResumen').innerText = d.resumen || 'Sin resumen disponible';
+
+                    const badge = document.getElementById('badgeTotal');
+                    badge.innerText = `Total: ${d.total || 'N/A'}`;
+                    badge.classList.remove('d-none');
+
+                    document.getElementById('resultContent').classList.remove('d-none');
+                    btnLimpiarResultados.classList.remove('d-none');
+                    cargarHistorial();
+                } else {
+                    mostrarError(json.error || 'El documento no superó los filtros de comprobante.');
+                    document.getElementById('emptyState').classList.remove('d-none');
+                }
+            } catch (err) {
+                document.getElementById('loader').classList.add('d-none');
+                document.getElementById('emptyState').classList.remove('d-none');
+                btnAnalizar.disabled = false;
+                mostrarError('Error de conexión con el servidor: ' + err);
+            }
+        }
+
+        async function cargarHistorial() {
+            try {
+                const res = await fetch('/api/historial');
+                const data = await res.json();
+                const tbody = document.getElementById('tablaHistorial');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No hay facturas registradas.</td></tr>';
+                    return;
+                }
+
+                data.forEach(item => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="font-mono text-muted">#${item.id}</td>
+                            <td class="fw-bold text-dark">${item.establecimiento}</td>
+                            <td class="font-mono small text-secondary">${item.nit}</td>
+                            <td class="text-secondary small">${item.fecha}</td>
+                            <td><span class="badge bg-success-subtle text-success border border-success-subtle font-mono">${item.total}</span></td>
+                            <td class="text-secondary small" style="max-width: 300px;">${item.resumen}</td>
+                            <td class="text-end">
+                                <button onclick="eliminarFactura(${item.id})" class="btn btn-sm btn-link text-danger p-0">
+                                    <i class="bi bi-trash fs-6"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function eliminarFactura(id) {
+            if (!confirm(`¿Eliminar la factura #${id}?`)) return;
+            try {
+                const res = await fetch(`/api/factura/${id}`, { method: 'DELETE' });
+                if (res.ok) cargarHistorial();
+                else alert('Error al eliminar');
+            } catch (err) {
+                alert('Error al eliminar: ' + err);
+            }
+        }
+
+        document.getElementById('btnLimpiarBD').addEventListener('click', async () => {
+            if (!confirm('¿Vaciar todas las facturas?')) return;
+            await fetch('/api/limpiar-historial', { method: 'POST' });
+            cargarHistorial();
+        });
+
+        cargarHistorial();
+    </script>
+</body>
+</html>
