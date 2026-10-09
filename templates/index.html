@@ -3,385 +3,579 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FacturaAI • Portal de Análisis y Gestión Contable</title>
-    
+    <title>FacturaAI • Suite de Auditoría y Conciliación Fiscal</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-    <!-- SweetAlert2 para modales y alertas estilizadas -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
     <style>
         :root {
             --bg-canvas: #f8fafc;
-            --surface-card: #ffffff;
-            --border-subtle: #e2e8f0;
-            --border-active: #cbd5e1;
+            --surface-sheet: #ffffff;
+            --navy-dark: #090e1a;
+            --navy-surface: #0f172a;
+            --brand-blue: #1d4ed8;
+            --brand-cyan: #0284c7;
+            --emerald-tax: #059669;
+            --emerald-soft: #ecfdf5;
+            --border-ledger: #e2e8f0;
             --text-heading: #0f172a;
-            --text-body: #334155;
             --text-muted: #64748b;
-            --brand-primary: #4f46e5;
-            --brand-primary-hover: #4338ca;
-            --brand-accent: #0284c7;
-            --radius-card: 16px;
-            --radius-inner: 10px;
         }
 
         body {
             background-color: var(--bg-canvas);
-            color: var(--text-body);
-            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            color: #1e293b;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             min-height: 100vh;
-        }
-
-        .card-enterprise {
-            background: var(--surface-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: var(--radius-card);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
-            transition: all 0.25s ease;
-        }
-
-        .dropzone-enterprise {
-            border: 2px dashed #cbd5e1;
-            background: #fafafa;
-            border-radius: var(--radius-inner);
-            cursor: pointer;
-            position: relative;
-        }
-
-        .dropzone-enterprise:hover, .dropzone-enterprise.dragover {
-            border-color: var(--brand-primary);
-            background: #f5f3ff;
-        }
-
-        .btn-brand-primary {
-            background: linear-gradient(135deg, var(--brand-primary) 0%, #3b82f6 100%);
-            color: #ffffff;
-            font-weight: 600;
-            border: none;
-            border-radius: var(--radius-inner);
-            padding: 12px 24px;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
-        }
-
-        .btn-brand-primary:hover:not(:disabled) {
-            background: linear-gradient(135deg, var(--brand-primary-hover) 0%, #2563eb 100%);
-            color: #ffffff;
-        }
-
-        .btn-brand-outline {
-            background: #ffffff;
-            border: 1px solid var(--border-subtle);
-            color: var(--text-body);
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 7px 14px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-brand-outline:hover {
-            background: #f8fafc;
-            border-color: var(--border-active);
-        }
-
-        .btn-delete-row {
-            background-color: #fee2e2;
-            color: #ef4444;
-            border: 1px solid #fecaca;
-            border-radius: 8px;
-            padding: 6px 12px;
-            font-size: 0.82rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .btn-delete-row:hover {
-            background-color: #ef4444;
-            color: #ffffff;
-            border-color: #ef4444;
-            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);
-        }
-
-        .input-enterprise {
-            background-color: #f8fafc !important;
-            border: 1px solid var(--border-subtle) !important;
-            color: var(--text-heading) !important;
-            border-radius: 8px;
-            font-size: 0.92rem;
-            padding: 9px 13px;
-        }
-
-        .field-caption {
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--text-muted);
-            margin-bottom: 5px;
         }
 
         .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-        .table-enterprise {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
+        /* Barra de Control de Póliza Superior */
+        .ledger-topbar {
+            background: var(--navy-dark);
+            color: #ffffff;
+            border-bottom: 2px solid #1e293b;
+            padding: 12px 32px;
         }
 
-        .table-enterprise thead th {
-            background: #f8fafc;
+        .kpi-indicator {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 6px 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Bloque de Ingesta Asimétrico */
+        .ingest-box {
+            background: #ffffff;
+            border: 1px solid var(--border-ledger);
+            border-radius: 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+        }
+
+        .ingest-tabs {
+            display: flex;
+            background: #f1f5f9;
+            border-bottom: 1px solid var(--border-ledger);
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
             color: var(--text-muted);
-            font-size: 0.75rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: var(--brand-blue);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        /* Visor de Escaneo */
+        .scanner-canvas {
+            min-height: 250px;
+            background: #fbfcfe;
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.25s ease;
+        }
+
+        .scanner-canvas:hover, .scanner-canvas.dragover {
+            border-color: var(--brand-blue);
+            background: #f0f7ff;
+        }
+
+        /* Botón Contable de Ejecución */
+        .btn-ledger-audit {
+            background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
+            color: #ffffff;
+            font-weight: 700;
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(30, 64, 175, 0.3);
+        }
+
+        .btn-ledger-audit:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(30, 64, 175, 0.45);
+            color: #ffffff;
+        }
+
+        .btn-ledger-audit:disabled {
+            background: #cbd5e1;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Póliza / Hoja de Liquidación Fiscal (Panel Derecho) */
+        .tax-policy-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
+            position: relative;
+        }
+
+        .tax-policy-header {
+            background: #f8fafc;
+            border-bottom: 2px dashed #cbd5e1;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tax-data-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .tax-card-row {
+            background: #f8fafc;
+            border: 1px solid var(--border-ledger);
+            border-radius: 10px;
+            padding: 10px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .tax-line-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+        }
+
+        .tax-line-content {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+            word-break: break-word;
+            white-space: normal;
+            line-height: 1.4;
+        }
+
+        /* Tabla de Auditoría */
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .ledger-table thead th {
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 0.72rem;
             font-weight: 700;
             text-transform: uppercase;
-            padding: 14px 18px;
-            border-bottom: 1px solid var(--border-subtle);
+            letter-spacing: 0.06em;
+            padding: 12px 18px;
         }
 
-        .table-enterprise tbody td {
-            padding: 14px 18px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.88rem;
-        }
-
-        .nav-pills .nav-link {
-            color: var(--text-muted);
-            font-weight: 600;
+        .ledger-table tbody td {
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--border-ledger);
             font-size: 0.85rem;
-            border-radius: 8px;
+            vertical-align: middle;
         }
 
-        .nav-pills .nav-link.active {
-            background-color: var(--brand-primary);
-            color: #fff;
+        .ledger-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .btn-row-trash {
+            background: #fff1f2;
+            color: #e11d48;
+            border: 1px solid #fecdd3;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .btn-row-trash:hover {
+            background: #e11d48;
+            color: #ffffff;
+        }
+
+        /* Modal de Inspección Forense / Zoom */
+        .zoom-viewport {
+            width: 100%;
+            height: 70vh;
+            background: #090e1a;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: grab;
+        }
+
+        .zoom-viewport:active {
+            cursor: grabbing;
+        }
+
+        .zoom-image-target {
+            max-height: 90%;
+            max-width: 90%;
+            transition: transform 0.1s ease-out;
+            transform-origin: center center;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .zoom-controls-floating {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            padding: 6px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10;
+        }
+
+        .zoom-controls-floating button {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .zoom-controls-floating button:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
-<body class="py-4">
-    <div class="container-xl">
+<body>
 
-        <!-- Encabezado -->
-        <header class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom">
-            <div class="d-flex align-items-center">
-                <div class="p-3 rounded-3 me-3 text-white shadow-sm" style="background: linear-gradient(135deg, #4f46e5, #0284c7);">
-                    <i class="bi bi-receipt-cutoff fs-3"></i>
-                </div>
-                <div>
-                    <div class="d-flex align-items-center gap-2">
-                        <h4 class="fw-bold mb-0 text-dark">FacturaAI</h4>
-                        <span class="badge rounded-pill bg-light text-primary border">Versión 2.5</span>
-                    </div>
-                    <p class="text-muted small mb-0 mt-1">Carga desde PC, enlace directo o captura móvil en vivo</p>
-                </div>
+    <!-- Barra de Métricas y Estado en Vivo -->
+    <header class="ledger-topbar d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <span class="p-2 rounded bg-primary text-white"><i class="bi bi-file-earmark-diff fs-5"></i></span>
+            <div>
+                <h6 class="mb-0 fw-bold tracking-tight text-white font-mono">FACTURA-AI // FISCAL ENGINE</h6>
+                <small class="text-secondary" style="font-size: 0.75rem;">Módulo de Inspección Documental y Conciliación</small>
             </div>
-        </header>
+        </div>
 
-        <div class="row g-4">
+        <div class="d-flex align-items-center gap-2 font-mono">
+            <div class="kpi-indicator">
+                <span style="width: 7px; height: 7px; background: #10b981; border-radius: 50%;"></span>
+                <span class="text-secondary small">AUDITADAS:</span>
+                <strong class="text-white" id="statContador">0</strong>
+            </div>
+            <div class="kpi-indicator">
+                <span class="text-secondary small">VOLUMEN AUDITADO:</span>
+                <strong class="text-success" id="statMontoTotal">Q0.00</strong>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-fluid px-4 py-4">
+        
+        <div class="row g-4 mb-4">
             
-            <!-- Panel Izquierdo: Carga y Procesamiento -->
+            <!-- Panel Izquierdo: Estación de Carga -->
             <div class="col-lg-5">
-                <div class="card-enterprise p-4 h-100 d-flex flex-column justify-content-between">
+                <div class="ingest-box p-4 h-100 d-flex flex-column justify-content-between">
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
-                                <i class="bi bi-cloud-arrow-up text-primary"></i> Origen del Documento
-                            </h6>
-                            <button type="button" id="btnLimpiarCarga" class="btn btn-sm btn-outline-danger d-none">
-                                <i class="bi bi-x-circle me-1"></i> Descartar
+                            <span class="text-uppercase fw-bold text-dark small font-mono">
+                                <i class="bi bi-camera-fill text-primary me-1"></i> Fuente del Comprobante
+                            </span>
+                            <button type="button" id="btnLimpiarCarga" class="btn btn-sm btn-outline-danger d-none py-0 px-2 font-mono" style="font-size: 0.75rem;">
+                                Descartar
                             </button>
                         </div>
 
                         <!-- Selector de Modos -->
-                        <ul class="nav nav-pills nav-fill mb-3" id="tabModo">
-                            <li class="nav-item">
-                                <button class="nav-link active" id="tabArchivo" type="button"><i class="bi bi-upload me-1"></i> Archivo</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link" id="tabLink" type="button"><i class="bi bi-link-45deg me-1"></i> Enlace</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link" id="tabMovil" type="button"><i class="bi bi-phone me-1"></i> Celular</button>
-                            </li>
-                        </ul>
+                        <div class="ingest-tabs mb-3" id="tabModo">
+                            <button class="tab-btn active" id="tabArchivo" type="button"><i class="bi bi-folder2-open me-1"></i> Archivo Local</button>
+                            <button class="tab-btn" id="tabLink" type="button"><i class="bi bi-globe2 me-1"></i> URL Remota</button>
+                            <button class="tab-btn" id="tabMovil" type="button"><i class="bi bi-qr-code me-1"></i> Móvil Live</button>
+                        </div>
 
                         <form id="uploadForm">
                             <!-- Modo 1: Archivo local -->
                             <div id="seccionArchivo">
                                 <input type="file" id="facturaInput" accept="image/*" class="d-none">
-                                <div id="dropzone" class="dropzone-enterprise p-4 text-center mb-3" style="min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div id="dropzone" class="scanner-canvas p-4 text-center mb-3">
                                     <div id="dropzoneContent">
-                                        <i class="bi bi-file-earmark-image fs-1 text-primary opacity-75 mb-2"></i>
-                                        <p class="fw-bold text-dark mb-1">Arrastra tu factura aquí o haz clic</p>
-                                        <span class="text-muted small">JPG, PNG o WEBP</span>
+                                        <i class="bi bi-cloud-arrow-up text-primary fs-2 d-block mb-2"></i>
+                                        <span class="fw-bold text-dark d-block">Coloca la factura o haz clic</span>
+                                        <small class="text-muted">Procesador visual compatible con JPG, PNG, WEBP</small>
                                     </div>
-                                    <img id="previewImg" src="#" alt="Factura" class="img-fluid rounded border d-none shadow-sm" style="max-height: 220px; object-fit: contain;">
+                                    <img id="previewImg" src="#" alt="Previa" class="img-fluid rounded border d-none" style="max-height: 240px; object-fit: contain;">
                                 </div>
                             </div>
 
                             <!-- Modo 2: Enlace directo -->
                             <div id="seccionLink" class="d-none mb-3">
-                                <label class="field-caption">URL Directa de la Imagen</label>
-                                <div class="input-group mb-2">
-                                    <span class="input-group-text bg-white"><i class="bi bi-globe"></i></span>
-                                    <input type="url" id="linkInput" class="form-control input-enterprise" placeholder="https://ejemplo.com/factura.jpg">
-                                </div>
-                                <div class="text-center p-2 border rounded bg-light" id="previewLinkContainer" style="min-height: 180px; display: flex; align-items: center; justify-content: center;">
-                                    <span class="text-muted small" id="previewLinkText">Pega un enlace directo para previsualizar</span>
-                                    <img id="previewLinkImg" src="#" alt="Preview URL" class="img-fluid rounded border d-none shadow-sm" style="max-height: 180px; object-fit: contain;">
+                                <small class="text-muted text-uppercase fw-bold font-mono d-block mb-1" style="font-size: 0.7rem;">Enlace directo a la imagen</small>
+                                <input type="url" id="linkInput" class="form-control mb-2 font-mono small" placeholder="https://servidor.com/comprobante.jpg">
+                                <div class="scanner-canvas p-2 text-center" id="previewLinkContainer" style="min-height: 200px;">
+                                    <span class="text-muted small font-mono" id="previewLinkText">[ Pega un enlace con formato de imagen ]</span>
+                                    <img id="previewLinkImg" src="#" alt="Preview URL" class="img-fluid rounded d-none" style="max-height: 190px; object-fit: contain;">
                                 </div>
                             </div>
 
                             <!-- Modo 3: Celular con Código QR -->
                             <div id="seccionMovil" class="d-none mb-3 text-center">
-                                <div class="p-3 border rounded bg-light">
-                                    <h6 class="fw-bold text-dark mb-1">Escanea con la cámara de tu celular</h6>
-                                    <p class="text-muted small mb-2">Conéctate al mismo Wi-Fi que esta computadora</p>
-                                    <img id="qrImg" src="#" alt="QR" class="img-fluid rounded border p-2 bg-white shadow-sm mb-2" style="max-width: 170px;">
-                                    <div class="font-mono small text-muted" id="qrUrlText">Cargando dirección...</div>
-                                    <div class="mt-2 text-primary small d-flex align-items-center justify-content-center gap-2">
+                                <div class="p-4 rounded border bg-light">
+                                    <h6 class="fw-bold text-dark mb-1">Emparejar Dispositivo Móvil</h6>
+                                    <p class="text-muted small mb-2">Escanea el código con tu celular dentro de la misma red</p>
+                                    <div class="p-2 bg-white rounded border d-inline-block shadow-sm">
+                                        <img id="qrImg" src="#" alt="QR" style="width: 150px; height: 150px;">
+                                    </div>
+                                    <div class="font-mono text-primary small mt-2" id="qrUrlText">Generando enlace...</div>
+                                    <div class="mt-3 text-muted small d-flex align-items-center justify-content-center gap-2">
                                         <div class="spinner-grow spinner-grow-sm text-primary" role="status"></div>
-                                        <span>Esperando captura desde el teléfono...</span>
+                                        <span>Esperando transmisión desde la cámara...</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <button type="submit" id="btnAnalizar" class="btn btn-brand-primary w-100 py-3 d-flex align-items-center justify-content-center gap-2" disabled>
-                                <i class="bi bi-stars"></i> Evaluar y Auditar Documento
+                            <button type="submit" id="btnAnalizar" class="btn btn-ledger-audit w-100 d-flex align-items-center justify-content-center gap-2 font-mono" disabled>
+                                <i class="bi bi-shield-check"></i> PROCESAR AUDITORÍA FISCAL
                             </button>
                         </form>
                     </div>
 
-                    <div class="mt-4 pt-3 border-top text-muted small d-flex justify-content-between">
-                        <span><i class="bi bi-shield-check text-success me-1"></i> Filtro de comprobante comercial</span>
-                        <span>Motor: Gemini AI</span>
+                    <div class="pt-3 mt-3 border-top d-flex justify-content-between text-muted small font-mono">
+                        <span><i class="bi bi-fingerprint text-success"></i> FILTRO ANTIFRAUDE</span>
+                        <span>OpenRouter Vision Engine</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Panel Derecho: Datos Extraídos -->
+            <!-- Panel Derecho: Póliza de Auditoría Contable -->
             <div class="col-lg-7">
-                <div class="card-enterprise p-4 h-100">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
-                            <i class="bi bi-receipt text-primary"></i> Resultado de la Auditoría
-                        </h6>
+                <div class="tax-policy-card h-100 d-flex flex-column">
+                    <div class="tax-policy-header">
+                        <div>
+                            <span class="text-muted font-mono small text-uppercase fw-bold">DICTAMEN DOCUMENTAL</span>
+                            <h5 class="fw-bold text-dark mb-0 font-mono">PÓLIZA DE AUDITORÍA #AI-REC</h5>
+                        </div>
                         <div class="d-flex align-items-center gap-2">
-                            <span id="badgeTotal" class="badge bg-success-subtle text-success border border-success-subtle font-mono fs-6 px-3 py-2 rounded-pill d-none">
-                                Total: Q0.00
+                            <!-- Botón de Inspección y Zoom Forense -->
+                            <button type="button" id="btnVerDetalleImg" class="btn btn-sm btn-primary d-none font-mono py-1 px-3 d-flex align-items-center gap-1 shadow-sm">
+                                <i class="bi bi-zoom-in"></i> Inspeccionar
+                            </button>
+                            <span id="badgeTotal" class="badge bg-success-subtle text-success border border-success font-mono fs-6 px-3 py-1 d-none">
+                                Q0.00
                             </span>
-                            <button type="button" id="btnLimpiarResultados" class="btn btn-brand-outline d-none">
-                                <i class="bi bi-eraser me-1"></i> Limpiar
+                            <button type="button" id="btnLimpiarResultados" class="btn btn-sm btn-outline-secondary d-none font-mono py-0 px-2">
+                                Limpiar
                             </button>
                         </div>
                     </div>
 
-                    <!-- Loader -->
-                    <div id="loader" class="text-center py-5 d-none">
-                        <div class="spinner-border text-primary mb-3" role="status" style="width: 2.8rem; height: 2.8rem;"></div>
-                        <h6 class="fw-bold text-dark">Auditando y validando contenido...</h6>
-                        <p class="text-muted small">Verificando autenticidad contable y desgloses de impuestos con Gemini.</p>
-                    </div>
-
-                    <!-- Mensaje de Rechazo / Error -->
-                    <div id="errorAlert" class="alert alert-danger d-none my-3" role="alert">
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <i class="bi bi-exclamation-octagon-fill fs-5"></i>
-                            <h6 class="alert-heading fw-bold mb-0">Comprobante Rechazado</h6>
-                        </div>
-                        <p id="errorMsg" class="mb-0 small"></p>
-                    </div>
-
-                    <!-- Estado Vacío -->
-                    <div id="emptyState" class="text-center py-5 text-muted">
-                        <div class="p-3 bg-light rounded-circle d-inline-block mb-3">
-                            <i class="bi bi-inbox fs-2 opacity-50"></i>
-                        </div>
-                        <p class="fw-bold text-dark mb-1">Sin factura analizada</p>
-                        <p class="small text-muted mx-auto" style="max-width: 320px;">Sube una imagen, pega una URL o escanea con tu teléfono para comenzar.</p>
-                    </div>
-
-                    <!-- Contenedor de Datos -->
-                    <div id="resultContent" class="d-none">
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-7">
-                                <div class="field-caption">Establecimiento</div>
-                                <input type="text" id="resEstablecimiento" class="form-control input-enterprise fw-bold" readonly>
-                            </div>
-                            <div class="col-md-5">
-                                <div class="field-caption">NIT / Identificación</div>
-                                <input type="text" id="resNit" class="form-control input-enterprise font-mono" readonly>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="field-caption">Fecha de Compra</div>
-                                <input type="text" id="resFecha" class="form-control input-enterprise" readonly>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="field-caption">Subtotal</div>
-                                <input type="text" id="resSubtotal" class="form-control input-enterprise font-mono" readonly>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="field-caption">Impuestos (IVA)</div>
-                                <input type="text" id="resImpuestos" class="form-control input-enterprise font-mono" readonly>
-                            </div>
+                    <div class="p-4 flex-grow-1">
+                        <!-- Loader -->
+                        <div id="loader" class="text-center py-5 d-none">
+                            <div class="spinner-border text-primary mb-3" style="width: 2.8rem; height: 2.8rem;" role="status"></div>
+                            <h6 class="fw-bold text-dark font-mono">ANALIZANDO CARACTERES Y DESGLOSE IMPOSITIVO...</h6>
+                            <p class="text-muted small">Gemini Vision está cotejando NIT, razón social y cálculo de IVA.</p>
                         </div>
 
-                        <div class="mb-3">
-                            <div class="field-caption">Productos Detectados</div>
-                            <textarea id="resProductos" class="form-control input-enterprise font-mono small" rows="2" readonly></textarea>
+                        <!-- Alerta de Rechazo -->
+                        <div id="errorAlert" class="alert alert-danger d-none my-3 border-0 rounded p-3 font-mono small" role="alert">
+                            <div class="fw-bold d-flex align-items-center gap-2 mb-1">
+                                <i class="bi bi-exclamation-octagon-fill"></i> [COMPROBANTE NO CONFORME]
+                            </div>
+                            <div id="errorMsg"></div>
                         </div>
 
-                        <div>
-                            <div class="field-caption">Resumen Ejecutivo</div>
-                            <div id="resResumen" class="p-3 rounded border bg-light text-dark small"></div>
+                        <!-- Estado Vacío -->
+                        <div id="emptyState" class="text-center py-5 text-muted">
+                            <i class="bi bi-receipt-cutoff fs-1 opacity-25 d-block mb-3"></i>
+                            <h6 class="fw-bold font-mono text-dark">SIN COMPROBANTE PROCESADO</h6>
+                            <small class="text-muted">Carga un documento en el panel izquierdo para generar la póliza fiscal.</small>
+                        </div>
+
+                        <!-- Póliza Contable Estructurada con Salto de Línea Natural -->
+                        <div id="resultContent" class="d-none font-mono">
+                            <div class="tax-data-grid mb-3">
+                                
+                                <div class="tax-card-row">
+                                    <span class="tax-line-label">Razón Social / Comercio</span>
+                                    <div id="resEstablecimiento" class="tax-line-content text-primary"></div>
+                                </div>
+
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <div class="tax-card-row h-100">
+                                            <span class="tax-line-label">Número de NIT / Identificación</span>
+                                            <div id="resNit" class="tax-line-content text-dark"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="tax-card-row h-100">
+                                            <span class="tax-line-label">Fecha de Emisión</span>
+                                            <div id="resFecha" class="tax-line-content text-dark"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <div class="tax-card-row h-100">
+                                            <span class="tax-line-label">Base Imponible (Subtotal)</span>
+                                            <div id="resSubtotal" class="tax-line-content text-dark"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="tax-card-row h-100">
+                                            <span class="tax-line-label">Impuesto al Valor Agregado (IVA)</span>
+                                            <div id="resImpuestos" class="tax-line-content text-warning"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="mb-3">
+                                <span class="tax-line-label d-block mb-1">Conceptos / Detalle de Compra</span>
+                                <div id="resProductos" class="p-3 rounded bg-light border text-dark small" style="white-space: pre-wrap; line-height: 1.5;"></div>
+                            </div>
+
+                            <div>
+                                <span class="tax-line-label d-block mb-1">Resumen Ejecutivo y Dictamen</span>
+                                <div id="resResumen" class="p-3 rounded bg-light border text-secondary small" style="line-height: 1.5;"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Historial -->
-        <div class="card-enterprise p-4 mt-4">
+        <!-- Libro Histórico y Exportador -->
+        <div class="ingest-box p-4">
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-                <h6 class="fw-bold text-dark mb-0">Historial de Facturas Aprobadas</h6>
-                <button type="button" id="btnLimpiarBD" class="btn btn-brand-outline text-danger d-flex align-items-center gap-1">
-                    <i class="bi bi-trash3"></i> Vaciar Historial
-                </button>
+                <div>
+                    <h6 class="fw-bold text-dark font-mono mb-0 text-uppercase">
+                        <i class="bi bi-journal-bookmark-fill text-primary me-1"></i> Libro Contable de Auditorías Guardadas
+                    </h6>
+                    <small class="text-muted">Registro consolidado listo para exportación y conciliación fiscal</small>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" id="btnExportarExcel" class="btn btn-sm btn-success font-mono py-1 px-3 d-flex align-items-center gap-2 fw-bold shadow-sm">
+                        <i class="bi bi-file-earmark-excel-fill"></i> Exportar a Excel (.xlsx)
+                    </button>
+                    <button type="button" id="btnLimpiarBD" class="btn btn-sm btn-outline-danger font-mono py-1 px-3">
+                        <i class="bi bi-trash3 me-1"></i> Vaciar Libro
+                    </button>
+                </div>
             </div>
 
             <div class="table-responsive rounded border">
-                <table class="table-enterprise">
+                <table class="ledger-table font-mono">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Establecimiento</th>
+                            <th>Folio</th>
+                            <th>Razón Social</th>
                             <th>NIT</th>
                             <th>Fecha</th>
-                            <th>Total Pagado</th>
-                            <th>Resumen</th>
-                            <th class="text-end">Acción</th>
+                            <th>Monto Liquidado</th>
+                            <th>Dictamen</th>
+                            <th class="text-end">Operación</th>
                         </tr>
                     </thead>
                     <tbody id="tablaHistorial">
-                        <tr><td colspan="7" class="text-center text-muted py-4">Cargando registros...</td></tr>
+                        <tr><td colspan="7" class="text-center text-muted py-4">Consultando base de datos SQLite...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
     </div>
 
+    <!-- Modal de Inspección Forense / Zoom en Alta Resolución -->
+    <div class="modal fade" id="modalZoom" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 18px; overflow: hidden; background: #0f172a;">
+                <div class="modal-header border-bottom border-secondary border-opacity-25 px-4 py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-search text-info fs-5"></i>
+                        <h6 class="modal-title text-white font-mono fw-bold mb-0">Inspección de Documento Original</h6>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 position-relative">
+                    <div class="zoom-viewport" id="zoomViewport">
+                        <img id="zoomImageTarget" src="#" alt="Inspección Comprobante" class="zoom-image-target">
+                        <div class="zoom-controls-floating">
+                            <button type="button" id="btnZoomOut" title="Reducir"><i class="bi bi-dash-lg"></i></button>
+                            <span id="zoomPercent" class="font-mono text-white small px-2">100%</span>
+                            <button type="button" id="btnZoomIn" title="Acercar"><i class="bi bi-plus-lg"></i></button>
+                            <button type="button" id="btnZoomReset" title="Restablecer" class="border-start ps-3"><i class="bi bi-aspect-ratio"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de control y exportación adaptada -->
     <script>
-        let modoActual = 'archivo'; // 'archivo' | 'link' | 'movil'
+        let modoActual = 'archivo';
         let intervaloPollingMovil = null;
+        let facturasMemoria = [];
+        let urlImagenActual = null;
+
+        // Variables de Zoom y Pan
+        let zoomScale = 1;
+        let isDragging = false;
+        let startX, startY;
+        let translateX = 0, translateY = 0;
 
         const tabArchivo = document.getElementById('tabArchivo');
         const tabLink = document.getElementById('tabLink');
@@ -403,9 +597,19 @@
         const btnAnalizar = document.getElementById('btnAnalizar');
         const btnLimpiarCarga = document.getElementById('btnLimpiarCarga');
         const btnLimpiarResultados = document.getElementById('btnLimpiarResultados');
+        const btnVerDetalleImg = document.getElementById('btnVerDetalleImg');
         const uploadForm = document.getElementById('uploadForm');
         const errorAlert = document.getElementById('errorAlert');
         const errorMsg = document.getElementById('errorMsg');
+
+        // Elementos de Zoom
+        const zoomViewport = document.getElementById('zoomViewport');
+        const zoomImageTarget = document.getElementById('zoomImageTarget');
+        const zoomPercent = document.getElementById('zoomPercent');
+        const btnZoomIn = document.getElementById('btnZoomIn');
+        const btnZoomOut = document.getElementById('btnZoomOut');
+        const btnZoomReset = document.getElementById('btnZoomReset');
+        const modalZoom = new bootstrap.Modal(document.getElementById('modalZoom'));
 
         function mostrarError(mensaje) {
             errorMsg.innerText = mensaje;
@@ -416,7 +620,6 @@
             errorAlert.classList.add('d-none');
         }
 
-        // Alternar pestañas
         tabArchivo.addEventListener('click', () => {
             modoActual = 'archivo';
             detenerPollingMovil();
@@ -451,7 +654,6 @@
             seccionLink.classList.add('d-none');
             btnAnalizar.disabled = true;
 
-            // Obtener enlace y código QR
             try {
                 const res = await fetch('/api/info-red');
                 const info = await res.json();
@@ -459,7 +661,7 @@
                 qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(info.url_movil)}`;
                 iniciarPollingMovil();
             } catch (e) {
-                qrUrlText.innerText = "Error obteniendo dirección IP local";
+                qrUrlText.innerText = "Error resolviendo red local";
             }
         });
 
@@ -471,9 +673,7 @@
                     const json = await res.json();
                     if (json.recibido) {
                         detenerPollingMovil();
-                        // 1. Mostrar de inmediato la imagen recibida en la vista previa izquierda
                         activarPreviaMovil(json.url_preview);
-                        // 2. Procesar con Gemini mostrando el loader al mismo tiempo
                         procesarCapturaMovil(json.ruta);
                     }
                 } catch (e) {}
@@ -488,7 +688,6 @@
         }
 
         function activarPreviaMovil(urlPreview) {
-            // Cambiar a la pestaña de vista previa visual
             seccionMovil.classList.add('d-none');
             seccionArchivo.classList.remove('d-none');
             tabMovil.classList.remove('active');
@@ -499,6 +698,8 @@
             previewImg.classList.remove('d-none');
             dropzoneContent.classList.add('d-none');
             btnLimpiarCarga.classList.remove('d-none');
+            urlImagenActual = urlPreview;
+            btnVerDetalleImg.classList.remove('d-none');
         }
 
         async function procesarCapturaMovil(ruta) {
@@ -516,17 +717,23 @@
                 previewLinkText.classList.add('d-none');
                 btnAnalizar.disabled = false;
                 btnLimpiarCarga.classList.remove('d-none');
+                urlImagenActual = url;
+                btnVerDetalleImg.classList.remove('d-none');
             } else {
                 previewLinkImg.classList.add('d-none');
                 previewLinkText.classList.remove('d-none');
                 btnAnalizar.disabled = true;
+                urlImagenActual = null;
+                btnVerDetalleImg.classList.add('d-none');
             }
         });
 
         previewLinkImg.addEventListener('error', () => {
             previewLinkImg.classList.add('d-none');
-            previewLinkText.innerText = "No se pudo cargar la imagen previa del enlace.";
+            previewLinkText.innerText = "No se pudo cargar la imagen del enlace.";
             previewLinkText.classList.remove('d-none');
+            urlImagenActual = null;
+            btnVerDetalleImg.classList.add('d-none');
         });
 
         function evaluarEstadoBoton() {
@@ -555,11 +762,14 @@
         });
 
         function cargarArchivo(file) {
-            previewImg.src = URL.createObjectURL(file);
+            const url = URL.createObjectURL(file);
+            previewImg.src = url;
             previewImg.classList.remove('d-none');
             dropzoneContent.classList.add('d-none');
             btnAnalizar.disabled = false;
             btnLimpiarCarga.classList.remove('d-none');
+            urlImagenActual = url;
+            btnVerDetalleImg.classList.remove('d-none');
             ocultarError();
         }
 
@@ -572,9 +782,11 @@
             previewLinkImg.classList.add('d-none');
             dropzoneContent.classList.remove('d-none');
             previewLinkText.classList.remove('d-none');
-            previewLinkText.innerText = "Pega un enlace directo para previsualizar";
+            previewLinkText.innerText = "[ Pega un enlace con formato de imagen ]";
             btnAnalizar.disabled = true;
             btnLimpiarCarga.classList.add('d-none');
+            btnVerDetalleImg.classList.add('d-none');
+            urlImagenActual = null;
             ocultarError();
         });
 
@@ -584,6 +796,67 @@
             btnLimpiarResultados.classList.add('d-none');
             document.getElementById('emptyState').classList.remove('d-none');
             ocultarError();
+        });
+
+        // Apertura del Modal de Inspección / Zoom
+        btnVerDetalleImg.addEventListener('click', () => {
+            if (!urlImagenActual) return;
+            zoomImageTarget.src = urlImagenActual;
+            resetZoom();
+            modalZoom.show();
+        });
+
+        function updateTransform() {
+            zoomImageTarget.style.transform = `translate(${translateX}px, ${translateY}px) scale(${zoomScale})`;
+            zoomPercent.innerText = Math.round(zoomScale * 100) + '%';
+        }
+
+        function resetZoom() {
+            zoomScale = 1;
+            translateX = 0;
+            translateY = 0;
+            updateTransform();
+        }
+
+        btnZoomIn.addEventListener('click', () => {
+            zoomScale = Math.min(zoomScale + 0.25, 4);
+            updateTransform();
+        });
+
+        btnZoomOut.addEventListener('click', () => {
+            zoomScale = Math.max(zoomScale - 0.25, 0.5);
+            updateTransform();
+        });
+
+        btnZoomReset.addEventListener('click', resetZoom);
+
+        // Zoom con rueda de ratón (Scroll)
+        zoomViewport.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                zoomScale = Math.min(zoomScale + 0.15, 4);
+            } else {
+                zoomScale = Math.max(zoomScale - 0.15, 0.5);
+            }
+            updateTransform();
+        });
+
+        // Arrastrar la imagen ampliada (Pan / Drag)
+        zoomViewport.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            updateTransform();
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
         });
 
         uploadForm.addEventListener('submit', async (e) => {
@@ -627,16 +900,16 @@
 
                 if (res.ok && json.status === 'success') {
                     const d = json.data;
-                    document.getElementById('resEstablecimiento').value = d.establecimiento || 'N/A';
-                    document.getElementById('resNit').value = d.nit || 'N/A';
-                    document.getElementById('resFecha').value = d.fecha || 'N/A';
-                    document.getElementById('resSubtotal').value = d.subtotal || 'N/A';
-                    document.getElementById('resImpuestos').value = d.impuestos || 'N/A';
-                    document.getElementById('resProductos').value = d.productos || 'N/A';
+                    document.getElementById('resEstablecimiento').innerText = d.establecimiento || 'N/A';
+                    document.getElementById('resNit').innerText = d.nit || 'N/A';
+                    document.getElementById('resFecha').innerText = d.fecha || 'N/A';
+                    document.getElementById('resSubtotal').innerText = d.subtotal || 'N/A';
+                    document.getElementById('resImpuestos').innerText = d.impuestos || 'N/A';
+                    document.getElementById('resProductos').innerText = d.productos || 'N/A';
                     document.getElementById('resResumen').innerText = d.resumen || 'Sin resumen disponible';
 
                     const badge = document.getElementById('badgeTotal');
-                    badge.innerText = `Total: ${d.total || 'N/A'}`;
+                    badge.innerText = `TOTAL: ${d.total || 'N/A'}`;
                     badge.classList.remove('d-none');
 
                     document.getElementById('resultContent').classList.remove('d-none');
@@ -650,7 +923,7 @@
                 document.getElementById('loader').classList.add('d-none');
                 document.getElementById('emptyState').classList.remove('d-none');
                 btnAnalizar.disabled = false;
-                mostrarError('Error de conexión con el servidor: ' + err);
+                mostrarError('Error de red o procesamiento: ' + err);
             }
         }
 
@@ -658,71 +931,125 @@
             try {
                 const res = await fetch('/api/historial');
                 const data = await res.json();
+                facturasMemoria = data;
                 const tbody = document.getElementById('tablaHistorial');
                 tbody.innerHTML = '';
 
                 if (data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No hay facturas registradas.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No hay facturas registradas en la base de datos.</td></tr>';
+                    document.getElementById('statContador').innerText = '0';
+                    document.getElementById('statMontoTotal').innerText = 'Q0.00';
                     return;
                 }
 
+                let suma = 0;
                 data.forEach(item => {
+                    const limpio = (item.total || '').replace(/[^0-9.]/g, '');
+                    const val = parseFloat(limpio);
+                    if (!isNaN(val)) suma += val;
+
                     tbody.innerHTML += `
                         <tr>
-                            <td class="font-mono text-muted">#${item.id}</td>
+                            <td class="text-primary fw-bold">#${item.id}</td>
                             <td class="fw-bold text-dark">${item.establecimiento}</td>
-                            <td class="font-mono small text-secondary">${item.nit}</td>
+                            <td class="text-secondary small">${item.nit}</td>
                             <td class="text-secondary small">${item.fecha}</td>
-                            <td><span class="badge bg-success-subtle text-success border border-success-subtle font-mono">${item.total}</span></td>
-                            <td class="text-secondary small" style="max-width: 300px;">${item.resumen}</td>
+                            <td><span class="badge bg-success-subtle text-success border border-success">${item.total}</span></td>
+                            <td class="text-secondary small" style="max-width: 280px;">${item.resumen}</td>
                             <td class="text-end">
-                                <button onclick="eliminarFactura(${item.id})" class="btn-delete-row" title="Eliminar comprobante">
-                                    <i class="bi bi-trash3-fill"></i>
-                                    <span>Eliminar</span>
+                                <button onclick="eliminarFactura(${item.id})" class="btn-row-trash" title="Eliminar registro">
+                                    <i class="bi bi-trash3-fill"></i> Borrar
                                 </button>
                             </td>
                         </tr>
                     `;
                 });
+
+                document.getElementById('statContador').innerText = data.length;
+                document.getElementById('statMontoTotal').innerText = 'Q' + suma.toFixed(2);
             } catch (e) {
                 console.error(e);
             }
         }
 
+        // Exportador a Excel Pro (.xlsx) con autoajuste de columnas
+        document.getElementById('btnExportarExcel').addEventListener('click', () => {
+            if (!facturasMemoria || facturasMemoria.length === 0) {
+                Swal.fire({
+                    title: 'Sin comprobantes',
+                    text: 'No hay facturas en la base de datos para exportar.',
+                    icon: 'info',
+                    confirmButtonColor: '#1d4ed8'
+                });
+                return;
+            }
+
+            const datosExcel = facturasMemoria.map(f => ({
+                "FOLIO": f.id,
+                "ESTABLECIMIENTO / COMERCIO": f.establecimiento || "N/A",
+                "NIT / ID TRIBUTARIO": f.nit || "N/A",
+                "FECHA DE EMISIÓN": f.fecha || "N/A",
+                "MONTO TOTAL LIQUIDADO": f.total || "N/A",
+                "DICTAMEN FORENSE Y RESUMEN": f.resumen || "N/A",
+                "FECHA DE REGISTRO EN SISTEMA": f.creado_en || "N/A"
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(datosExcel);
+
+            const headers = Object.keys(datosExcel[0]);
+            const cols = headers.map(key => {
+                let max = key.length;
+                datosExcel.forEach(row => {
+                    const str = (row[key] || '').toString();
+                    if (str.length > max) max = str.length;
+                });
+                return { wch: Math.min(Math.max(max + 4, 12), 48) };
+            });
+            worksheet['!cols'] = cols;
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Pólizas Auditadas");
+
+            const fecha = new Date().toISOString().slice(0, 10);
+            XLSX.writeFile(workbook, `Libro_Contable_FacturaAI_${fecha}.xlsx`);
+
+            Swal.fire({
+                title: '¡Excel Generado!',
+                text: 'El reporte contable se exportó con formato y anchos ajustados.',
+                icon: 'success',
+                timer: 1600,
+                showConfirmButton: false
+            });
+        });
+
         async function eliminarFactura(id) {
             Swal.fire({
-                title: '¿Eliminar factura?',
-                text: `La factura #${id} será removida permanentemente del historial.`,
+                title: '¿Remover comprobante?',
+                text: `La póliza #${id} se eliminará permanentemente.`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#ef4444',
+                confirmButtonColor: '#e11d48',
                 cancelButtonColor: '#64748b',
-                confirmButtonText: '<i class="bi bi-trash3-fill me-1"></i> Sí, eliminar',
-                cancelButtonText: 'Cancelar',
-                customClass: {
-                    popup: 'rounded-4 shadow-lg border'
-                }
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
                         const res = await fetch(`/api/factura/${id}`, { method: 'DELETE' });
                         if (res.ok) {
                             Swal.fire({
-                                title: '¡Eliminada!',
-                                text: `La factura #${id} se ha borrado correctamente.`,
+                                title: 'Eliminada',
+                                text: `La póliza #${id} fue removida del registro.`,
                                 icon: 'success',
-                                timer: 1400,
-                                showConfirmButton: false,
-                                customClass: {
-                                    popup: 'rounded-4'
-                                }
+                                timer: 1300,
+                                showConfirmButton: false
                             });
                             cargarHistorial();
                         } else {
-                            Swal.fire('Error', 'No se pudo eliminar el registro en la base de datos.', 'error');
+                            Swal.fire('Error', 'No se pudo eliminar el comprobante.', 'error');
                         }
                     } catch (err) {
-                        Swal.fire('Error', 'Error de red al intentar eliminar: ' + err, 'error');
+                        Swal.fire('Error', 'Fallo de red: ' + err, 'error');
                     }
                 }
             });
@@ -730,38 +1057,32 @@
 
         document.getElementById('btnLimpiarBD').addEventListener('click', async () => {
             Swal.fire({
-                title: '¿Vaciar todo el historial?',
-                text: 'Se eliminarán de forma irreversible todas las facturas y comprobantes auditados.',
+                title: '¿Vaciar libro completo?',
+                text: 'Se purgarán todas las auditorías registradas.',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#ef4444',
+                confirmButtonColor: '#e11d48',
                 cancelButtonColor: '#64748b',
-                confirmButtonText: '<i class="bi bi-trash3-fill me-1"></i> Sí, vaciar todo',
-                cancelButtonText: 'Cancelar',
-                customClass: {
-                    popup: 'rounded-4 shadow-lg border'
-                }
+                confirmButtonText: 'Sí, vaciar todo',
+                cancelButtonText: 'Cancelar'
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
                         const res = await fetch('/api/limpiar-historial', { method: 'POST' });
                         if (res.ok) {
                             Swal.fire({
-                                title: 'Historial limpio',
-                                text: 'Se han eliminado todos los registros almacenados.',
+                                title: 'Libro vaciado',
+                                text: 'Se restableció el archivo de comprobantes.',
                                 icon: 'success',
-                                timer: 1500,
-                                showConfirmButton: false,
-                                customClass: {
-                                    popup: 'rounded-4'
-                                }
+                                timer: 1400,
+                                showConfirmButton: false
                             });
                             cargarHistorial();
                         } else {
                             Swal.fire('Error', 'No se pudo vaciar la base de datos.', 'error');
                         }
                     } catch (err) {
-                        Swal.fire('Error', 'Error de red: ' + err, 'error');
+                        Swal.fire('Error', 'Fallo de red: ' + err, 'error');
                     }
                 }
             });
